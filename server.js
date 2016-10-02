@@ -13,7 +13,7 @@ var room = require('./classes/room').room;
 var player = require('./classes/player').player;
 var queue = require('./classes/queue').queue;
 
-app.use('/client',express.static(__dirname + '/client'));
+app.use(express.static(__dirname + '/files'));
 
 app.get('/',function(req, res) {
     res.sendFile(__dirname + '/files/index.html');
