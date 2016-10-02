@@ -1,11 +1,11 @@
 <style>
 canvas {
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:auto;
 }
 
 #login {
@@ -26,7 +26,7 @@ canvas {
 
 <div id = "mainCanv">
 
-<div id="login" onmousedown="mouseDrag()">
+<div id="login" class = "menuDiv">
 	<div id = "centText">Username</div> <input id="username">
 	<div id = "centText">Email</div> <input id="email">
 	<div id = "centText">Password</div> <input id="password">
@@ -41,7 +41,8 @@ canvas {
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.js"></script>
-<script src="/javascripts/mouseDrag.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
 
 
@@ -180,5 +181,9 @@ function login(){
 		initRender()
 	 })
 }
+
+$(function() {
+	$( ".menuDiv" ).draggable({ containment: "#easel" });
+});
 
 </script>
