@@ -1,0 +1,184 @@
+<style>
+canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+
+}
+
+#login {
+	width : 10%;
+	height: 15%;
+	position: absolute;
+	top: 30%;
+	left:43%;
+	z-index:3;
+	background: lightblue;
+	display:table;
+	text-align: center;
+}
+
+</style>
+
+<b>
+
+<div id = "mainCanv">
+
+<div id="login">
+	<div id = "centText">Username</div> <input id="username">
+	<div id = "centText">Email</div> <input id="email">
+	<div id = "centText">Password</div> <input id="password">
+	<button type="button" onclick="login()" style="float: left;">Login</button>	
+	<button type="button" onclick="signup()" style="float: right;">Signup</button>
+</div>
+	
+	</div>
+</b>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.js"></script>
+
+<script>
+
+
+///////////////////////Vue Initiation//////////////////////////////////
+new Vue({
+    el: '#login',
+    data: {
+
+    }
+})
+
+
+//////////////////////Canvas Initiation////////////////////////////////
+var canvas = document.createElement('canvas')
+canvas.id = 'easel'
+canvas.width = window.innerWidth * 6/8
+canvas.height = window.innerHeight *7/8
+
+var stage = new createjs.Stage("easel");
+
+document.getElementById("mainCanv").appendChild( canvas );
+
+document.getElementById("easel").style.zIndex = "2";
+document.getElementById("easel").style.position = "absolute";
+
+    var socket = io('/login');
+	
+	document.addEventListener( "keydown", doKeyDown, true);
+	document.addEventListener( "keyup", doKeyUp, true);
+
+
+	function doKeyDown(e) {
+
+console.log(e.keyCode)
+	if (e.keyCode == 87){
+		socket.emit('move', 'up');
+	}else if (e.keyCode == 83){
+		socket.emit('move', 'down');
+	}
+	
+	if (e.keyCode == 65){
+		socket.emit('move', 'left');
+	}else if (e.keyCode == 68){
+		socket.emit('move', 'right');
+	}
+
+}
+
+function doKeyUp(e) {
+
+console.log(e.keyCode)
+	if (e.keyCode == 87){
+		socket.emit('move', 'stop');
+	}else if (e.keyCode == 83){
+		socket.emit('move', 'stop');
+	}
+	
+	if (e.keyCode == 65){
+		socket.emit('move', 'stop');
+	}else if (e.keyCode == 68){
+		socket.emit('move', 'stop');
+	}
+}
+
+function initInterface(){
+
+	var button = new createjs.Shape();
+	button.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
+	button.x = canvas.width/2 + window.innerWidth * 1/8;
+	button.y = canvas.height/2 + window.innerHeight * 1/16;
+	
+	button.addEventListener("click", function(evt) {
+		startGame(0);
+		stage.clear();
+		
+		socket.emit('requestingGameResources')
+		
+		socket.on('getResources',function(data){
+		loadResources()
+		})
+		
+		refresh()	
+	});
+	stage.addChild(button);
+	stage.update();
+}
+
+function loadResources(meshes){
+
+}
+
+function refresh(){
+socket.on('newPositions',function(data){
+	 ctx.clearRect(0,0,500,500);
+        for(var i = 0 ; i < data.length; i++){
+				
+			}		   
+		});
+}
+
+function initRender(){
+	scene = new THREE.Scene();
+	
+	camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize(canvas.width, canvas.height );
+	renderer.domElement.id = 'threejs'
+	document.body.appendChild( renderer.domElement );
+}
+
+function startGame(roomid){
+	console.log('Took you long enough')
+	socket.emit('join', roomid)
+	
+	socket = io('/room');
+}
+	
+socket.on('newRoom',function(data){
+        ctx.clearRect(0,0,500,500);
+        console.log(data)
+    });
+	
+function login(){
+	var username = document.getElementById("username").value
+	var password = document.getElementById("password").value
+	var email = document.getElementById("email").value
+	
+	 socket.emit('login',username, 
+	 password,
+	 email)
+	 
+	 socket.on('loginAccepted',function(data){
+		socket = io('/game');
+		
+		initInterface()
+		initRender()
+	 })
+}
+
+</script>

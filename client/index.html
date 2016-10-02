@@ -1,0 +1,52 @@
+<canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+ 
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+    var ctx = document.getElementById("ctx").getContext("2d");
+    ctx.font = '30px Arial';
+   
+    var socket = io();
+	
+	document.addEventListener( "keydown", doKeyDown, true);
+	document.addEventListener( "keyup", doKeyUp, true);
+
+
+	function doKeyDown(e) {
+
+console.log(e.keyCode)
+	if (e.keyCode == 87){
+		socket.emit('move', 'up');
+	}else if (e.keyCode == 83){
+		socket.emit('move', 'down');
+	}
+	
+	if (e.keyCode == 65){
+		socket.emit('move', 'left');
+	}else if (e.keyCode == 68){
+		socket.emit('move', 'right');
+	}
+
+}
+
+function doKeyUp(e) {
+
+console.log(e.keyCode)
+	if (e.keyCode == 87){
+		socket.emit('move', 'stop');
+	}else if (e.keyCode == 83){
+		socket.emit('move', 'stop');
+	}
+	
+	if (e.keyCode == 65){
+		socket.emit('move', 'stop');
+	}else if (e.keyCode == 68){
+		socket.emit('move', 'stop');
+	}
+}
+
+socket.on('newPositions',function(data){
+        ctx.clearRect(0,0,500,500);
+        for(var i = 0 ; i < data.length; i++)
+           ctx.fillText(data[i].number,data[i].x,data[i].y);      
+    });
+</script>

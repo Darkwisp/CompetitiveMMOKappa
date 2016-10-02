@@ -1,0 +1,29 @@
+Username: <input id="username">
+<br>
+Password: <input id="password">
+<br>
+Email: <input id="email">
+<br>
+<button type="button" onclick="login()">Login</button>
+<button type="button" onclick="signup()">Signup</button>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+	var socket = io('/login');
+	
+	function login(){
+	
+	var username = document.getElementById("username").value
+	var password = document.getElementById("password").value
+	var email = document.getElementById("email").value
+	
+	 socket.emit('login',username, 
+	 password,
+	 email)
+	}
+	
+	function signup (){
+	console.log('TO DO: redirect')
+	}
+</script>
