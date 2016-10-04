@@ -1,4 +1,4 @@
-function player(id, name, x, y, hp, en){
+function player(id, name, x, y, z, hp, en){
 	var self = this
 	this.parent;
 	
@@ -64,7 +64,7 @@ function player(id, name, x, y, hp, en){
 	this.siz = {x:100, y:100, z:200}
 	
 	this.stationary = true
-	this.orientation = ori
+	this.orientation = 0
 
 	this.buffs = []
 
@@ -81,7 +81,14 @@ function player(id, name, x, y, hp, en){
 		slot6:'None',
 	}
 	
-	this.actManager = require('./actManager');
+	this.controls = [
+		{code : 87 || 38}, //Up
+		{code : 83 || 40}, //Down
+		{code : 65 || 37}, //Right
+		{code : 68 || 39}, //Left
+	]
+	
+	//this.actManager = require('./actManager');
 	
 	this.onInit = function(){
 		

@@ -15,10 +15,41 @@ canvas {
 	top: 30%;
 	left:43%;
 	z-index:3;
-	background: lightblue;
+	background: rgba(76, 0, 128, 0.3);
 	display:table;
 	text-align: center;
+	padding: 0.5em;
 }
+
+#quests {
+	width : 20%;
+	height: 10%;
+	position: absolute;
+	top: 10%;
+	left: 65%;
+	z-index:-1;
+	opacity:0;
+	background: rgba(76, 0, 128, 0.3);
+	display:table;
+	text-align: center;
+	padding: 0.5em;
+}
+
+#close{
+	float : right;
+}
+
+.ui-resizable { position: relative;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px; display: block; }
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0; }
+.ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0; }
+.ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 7px; left: -5px; top: 0; height: 100%; }
+.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
+.ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
+.ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
+.ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}
 
 </style>
 
@@ -33,7 +64,17 @@ canvas {
 	<button type="button" onclick="login()" style="float: left;">Login</button>	
 	<button type="button" onclick="signup()" style="float: right;">Signup</button>
 </div>
-	
+
+<div id="quests" class = "menuDiv">
+<ul id="questList" style="list-style: none; float:left; padding-right: 2px; padding-left: 2px; margin-top: 2px; margin-bottom: 1px;">
+  <li v-for="item in items">
+  <span id='close' onclick='this.parentNode.parentNode.removeChild(this.parentNode); return false;'>x</span>
+    {{ item.message }}
+  </li>
+  
+</ul>
+</div>
+
 	</div>
 </b>
 
@@ -47,13 +88,31 @@ canvas {
 
 
 ///////////////////////Vue Initiation//////////////////////////////////
-new Vue({
-    el: '#login',
-    data: {
-
-    }
+var questList = new Vue({
+  el: '#questList',
+  data: {
+    items: [
+      { message: 'Foo' },
+      { message: 'Bar' },
+	  { message: 'Hey!' },
+	  { message: 'Listen!' }
+    ]
+  }
 })
 
+//////////////////////Listenersss/////////////////////////////////////
+
+document.addEventListener( "keydown", doKeyDown, true);
+document.addEventListener( "keyup", doKeyUp, true);
+
+
+function doKeyDown(e) {
+		socket.emit('press', e.keyCode);
+}
+
+function doKeyUp(e) {
+	socket.emit('release', e.keyCode);
+}
 
 //////////////////////Canvas Initiation////////////////////////////////
 var canvas = document.createElement('canvas')
@@ -62,6 +121,8 @@ canvas.width = window.innerWidth * 6/8
 canvas.height = window.innerHeight *7/8
 
 var stage = new createjs.Stage("easel");
+var camera;
+var scene;
 
 document.getElementById("mainCanv").appendChild( canvas );
 
@@ -69,43 +130,6 @@ document.getElementById("easel").style.zIndex = "2";
 document.getElementById("easel").style.position = "absolute";
 
     var socket = io('/login');
-	
-	document.addEventListener( "keydown", doKeyDown, true);
-	document.addEventListener( "keyup", doKeyUp, true);
-
-
-	function doKeyDown(e) {
-
-console.log(e.keyCode)
-	if (e.keyCode == 87){
-		socket.emit('move', 'up');
-	}else if (e.keyCode == 83){
-		socket.emit('move', 'down');
-	}
-	
-	if (e.keyCode == 65){
-		socket.emit('move', 'left');
-	}else if (e.keyCode == 68){
-		socket.emit('move', 'right');
-	}
-
-}
-
-function doKeyUp(e) {
-
-console.log(e.keyCode)
-	if (e.keyCode == 87){
-		socket.emit('move', 'stop');
-	}else if (e.keyCode == 83){
-		socket.emit('move', 'stop');
-	}
-	
-	if (e.keyCode == 65){
-		socket.emit('move', 'stop');
-	}else if (e.keyCode == 68){
-		socket.emit('move', 'stop');
-	}
-}
 
 function initInterface(){
 
@@ -143,14 +167,36 @@ socket.on('newPositions',function(data){
 		});
 }
 
-function initRender(){
-	scene = new THREE.Scene();
+function render(){
+
+	//requestAnimationFrame( render );
+	renderer.render( scene, camera );
 	
-	camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
+}
+
+function initRender(){
+
+var geometry = new THREE.BoxGeometry( 3, 3, 3 );
+
+	scene = new THREE.Scene();
+	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 	renderer = new THREE.WebGLRenderer();
+	
 	renderer.setSize(canvas.width, canvas.height );
-	renderer.domElement.id = 'threejs'
 	document.body.appendChild( renderer.domElement );
+	
+	var light = new THREE.PointLight( 0xFFFF00, 1, 100 );
+	light.position.set( 1, 1, 3 );
+    scene.add( light );
+	
+	camera.position.set( 0, 3, 5 );
+	camera.fov *= 45;
+	camera.rotation.x = -10 * Math.PI / 180
+	camera.updateProjectionMatrix();
+	
+	//cube.rotation.x = 1;
+	//cube.rotation.y = 100;
+	render()
 }
 
 function startGame(roomid){
@@ -159,11 +205,6 @@ function startGame(roomid){
 	
 	socket = io('/room');
 }
-	
-socket.on('newRoom',function(data){
-        ctx.clearRect(0,0,500,500);
-        console.log(data)
-    });
 	
 function login(){
 	var username = document.getElementById("username").value
@@ -182,11 +223,70 @@ function login(){
 		
 		document.getElementById("login").style.zIndex = -1
 		document.getElementById("login").style.opacity = 1
+		
+		socket.on('newPositions',function(data){
+			//ctx.clearRect(0,0,500,500);
+			
+			for( var i = scene.children.length - 1; i >= 0; i--){
+			if ( scene.children[i] !== camera && i !== 0) {
+			
+				if (scene.children[i].material && scene.children[i].geometry){
+					scene.children[i].material.dispose();
+					scene.children[i].geometry.dispose();
+				}
+				
+					scene.remove(scene.children[i]);
+					
+				}
+			}
+
+			for (g in data) {
+				//console.log(data[g].x)
+				
+				var geometry = new THREE.BoxGeometry( 3, 2, 1 );
+				
+				var material = new THREE.MeshStandardMaterial( { color: 0xFC8970 } );
+				
+				var cube = new THREE.Mesh( geometry, material );
+				cube.position.set(data[g].x,data[g].y,data[g].z)
+				
+				if (g == 0){
+					console.log(data[g].x)
+					//scene.children[1].position.set(data[g].x,data[g].y,data[g].z)
+					cube.add(camera)
+					
+					var relativeCameraOffset = new THREE.Vector3(0,3,5);
+
+					var cameraOffset = relativeCameraOffset.applyMatrix4( cube.matrixWorld );
+					
+					camera.position.x = cameraOffset.x;
+					camera.position.y = cameraOffset.y;
+					camera.position.z = cameraOffset.z;
+					camera.lookAt( cube );
+					
+					console.log(cube.x)
+					
+				}
+				
+				scene.add( cube );
+				
+			}
+			
+			renderer.render( scene, camera );
+			
+				
+		
+		});
+	
 	 })
 }
 
 $(function() {
 	$( ".menuDiv" ).draggable({ containment: "#easel" });
+	$(".menuDiv").resizable({handles: 'n, e, s, w', containment: "#easel"});
+
+	$( "#questList" ).sortable();
+    $( "#questList" ).disableSelection();
 });
 
 </script>
