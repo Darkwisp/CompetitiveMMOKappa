@@ -64,7 +64,7 @@ function player(id, name, x, y, z, hp, en){
 	this.siz = {x:100, y:100, z:200}
 	
 	this.stationary = true
-	this.orientation = 0
+	this.ori = {x:0, y:0, z:0}
 
 	this.buffs = []
 

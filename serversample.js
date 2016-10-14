@@ -17,6 +17,8 @@ function Player (id){
 	this.x = 250
 	this.y = 250
 	this.id = 250
+	this.xvel = 0
+	this.yvel = 0
 }
  
 var io = require('socket.io')(serv,{});
@@ -53,8 +55,8 @@ setInterval(function(){
     for(var i in SOCKET_LIST){
         var player = PLAYER_LIST[i];
 		
-		//player.x +=  player.xvel;
-        //player.y += player.yvel;
+		player.x +=  player.xvel;
+        player.y += player.yvel;
 		
         io.emit('newPositions',pack);
     }
